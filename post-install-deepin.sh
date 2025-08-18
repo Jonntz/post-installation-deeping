@@ -4,8 +4,8 @@
 set -euo pipefail
 
 ### ========= CONFIG =========
-GIT_USER="Jonntz"
-GIT_EMAIL="monteirojonatas23@gmail.com"
+GIT_USER=""
+GIT_EMAIL=""
 
 # Versões desejadas
 PY311="3.11.9"
