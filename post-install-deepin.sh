@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pós-instalação Deepin 25 — Dev Web/Mobile/Desktop + Apps + IA
-# Autor: Jonntz
-set -euo pipefail
+# Autor: Jonataas Sousa Monteiro
+set-euo pipefail
 
 ### ========= CONFIG =========
 GIT_USER=""
@@ -11,7 +11,7 @@ GIT_EMAIL=""
 PY311="3.11.9"
 PY312="3.12.4"
 PY313="3.13.0"
-NODE22="22.7.0"
+NODE22="22.12.0" 
 NODE24="24.0.0"
 DOTNET8="8.0.401"
 DOTNET9="9.0.100"
@@ -109,7 +109,9 @@ asdf install nodejs "${NODE22}"
 asdf install nodejs "${NODE24}"
 asdf global nodejs "${NODE22}"
 
+# CORREÇÃO: Ativa o corepack e força sua própria atualização para obter as chaves de segurança mais recentes
 corepack enable
+corepack install --global corepack@latest
 corepack prepare yarn@stable --activate || true
 corepack prepare pnpm@latest --activate || true
 
@@ -121,11 +123,27 @@ asdf reshim
 npm install -g @angular/cli@20
 
 ### ===== INSTALAÇÃO DOCKER =====
+log "🐳 Instalando Docker via repositório oficial..."
 sudo apt remove -y docker docker-engine docker.io containerd runc || true
+
+# 1. Adicionar a chave GPG oficial do Docker
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# 2. Adicionar o repositório do Docker com o codinome correto
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  bookworm stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 3. Instalar o Docker Engine
+sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo systemctl enable docker
-sudo systemctl start docker
-sudo usermod -aG docker $USER
+
+# 4. Configurar permissões e serviço
+sudo systemctl enable docker --now
+sudo usermod -aG docker "$USER"
 log "✅ Docker instalado. Use 'newgrp docker' para aplicar permissões sem logout."
 
 ### ===== INSTALAÇÃO LLM / Ollama =====
